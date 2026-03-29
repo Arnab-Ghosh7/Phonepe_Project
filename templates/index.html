@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>PhonePe Transaction Predictor</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --purple:  #5f2eea;
+    --indigo:  #4a1ddb;
+    --pink:    #cb3077;
+    --gold:    #f7b731;
+    --dark:    #0d0d1a;
+    --card:    #13132b;
+    --border:  #2a2a4a;
+    --text:    #e8e8f0;
+    --muted:   #7070a0;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    font-family: "DM Sans", sans-serif;
+    background: var(--dark);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* animated background grid */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(95,46,234,.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(95,46,234,.06) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* glow blobs */
+  .blob {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(120px);
+    pointer-events: none;
+    z-index: 0;
+    opacity: .35;
+  }
+  .blob-1 { width:500px; height:500px; background:var(--purple); top:-150px; left:-100px; }
+  .blob-2 { width:400px; height:400px; background:var(--pink);   bottom:-100px; right:-80px; }
+
+  /* ── HEADER ── */
+  header {
+    position: relative;
+    z-index: 10;
+    padding: 28px 48px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    border-bottom: 1px solid var(--border);
+    backdrop-filter: blur(12px);
+    background: rgba(13,13,26,.6);
+  }
+  .logo {
+    width: 42px; height: 42px;
+    background: linear-gradient(135deg, var(--purple), var(--pink));
+    border-radius: 12px;
+    display: grid; place-items: center;
+    font-family: "Syne", sans-serif;
+    font-weight: 800; font-size: 18px;
+  }
+  header h1 {
+    font-family: "Syne", sans-serif;
+    font-size: 20px; font-weight: 700;
+    letter-spacing: -.3px;
+  }
+  header span { color: var(--muted); font-size: 13px; margin-left: auto; }
+
+  /* ── HERO ── */
+  .hero {
+    position: relative; z-index: 5;
+    text-align: center;
+    padding: 72px 24px 48px;
+  }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(95,46,234,.15);
+    border: 1px solid rgba(95,46,234,.4);
+    color: #a78bfa;
+    padding: 6px 14px; border-radius: 999px;
+    font-size: 12px; font-weight: 500;
+    letter-spacing: .5px; text-transform: uppercase;
+    margin-bottom: 24px;
+  }
+  .hero h2 {
+    font-family: "Syne", sans-serif;
+    font-size: clamp(32px, 5vw, 56px);
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -1.5px;
+    background: linear-gradient(135deg, #fff 30%, #a78bfa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 16px;
+  }
+  .hero p {
+    color: var(--muted); font-size: 17px; max-width: 480px; margin: 0 auto;
+  }
+
+  /* ── MAIN LAYOUT ── */
+  .main {
+    position: relative; z-index: 5;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 24px 80px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+  @media(max-width:760px) { .main { grid-template-columns: 1fr; } }
+
+  /* ── CARD ── */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 32px;
+    backdrop-filter: blur(8px);
+  }
+  .card-title {
+    font-family: "Syne", sans-serif;
+    font-size: 15px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 1px;
+    color: var(--muted);
+    margin-bottom: 24px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .card-title::before {
+    content: "";
+    width: 6px; height: 6px;
+    background: var(--purple);
+    border-radius: 50%;
+    display: inline-block;
+  }
+
+  /* ── FORM ── */
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .form-group { display: flex; flex-direction: column; gap: 8px; }
+  .form-group.full { grid-column: 1/-1; }
+
+  label {
+    font-size: 12px; font-weight: 500;
+    text-transform: uppercase; letter-spacing: .8px;
+    color: var(--muted);
+  }
+
+  input, select {
+    background: rgba(255,255,255,.04);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    font-family: "DM Sans", sans-serif;
+    font-size: 15px;
+    padding: 12px 14px;
+    width: 100%;
+    transition: border-color .2s, box-shadow .2s;
+    outline: none;
+  }
+  input:focus, select:focus {
+    border-color: var(--purple);
+    box-shadow: 0 0 0 3px rgba(95,46,234,.15);
+  }
+  select option { background: #1a1a35; }
+
+  /* ── BUTTON ── */
+  .btn {
+    width: 100%; margin-top: 8px;
+    padding: 16px;
+    background: linear-gradient(135deg, var(--purple), var(--indigo));
+    border: none; border-radius: 12px;
+    color: #fff;
+    font-family: "Syne", sans-serif;
+    font-size: 16px; font-weight: 700;
+    letter-spacing: .3px;
+    cursor: pointer;
+    transition: transform .15s, box-shadow .2s, opacity .2s;
+    position: relative; overflow: hidden;
+  }
+  .btn::after {
+    content: "";
+    position: absolute; inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,.12), transparent);
+    opacity: 0; transition: opacity .2s;
+  }
+  .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(95,46,234,.4); }
+  .btn:hover::after { opacity: 1; }
+  .btn:active { transform: translateY(0); }
+  .btn:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+
+  .btn-spinner {
+    display: inline-block;
+    width: 16px; height: 16px;
+    border: 2px solid rgba(255,255,255,.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin .7s linear infinite;
+    margin-right: 8px;
+    vertical-align: middle;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── RESULTS ── */
+  .results { grid-column: 2; grid-row: 1/3; }
+  @media(max-width:760px) { .results { grid-column: 1; grid-row: auto; } }
+
+  .result-empty {
+    height: 100%;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 12px; text-align: center;
+    color: var(--muted); min-height: 300px;
+  }
+  .result-empty svg { opacity: .3; }
+
+  /* big metric */
+  .metric-block {
+    background: linear-gradient(135deg, rgba(95,46,234,.12), rgba(203,48,119,.08));
+    border: 1px solid rgba(95,46,234,.25);
+    border-radius: 16px;
+    padding: 28px 24px;
+    text-align: center;
+    margin-bottom: 20px;
+    position: relative; overflow: hidden;
+  }
+  .metric-block::before {
+    content: "";
+    position: absolute; top: -40px; right: -40px;
+    width: 120px; height: 120px;
+    background: radial-gradient(circle, rgba(95,46,234,.3), transparent 70%);
+    border-radius: 50%;
+  }
+  .metric-label {
+    font-size: 11px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 1.2px;
+    color: var(--muted); margin-bottom: 10px;
+  }
+  .metric-value {
+    font-family: "Syne", sans-serif;
+    font-size: 42px; font-weight: 800;
+    background: linear-gradient(135deg, #fff, #a78bfa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    line-height: 1;
+  }
+  .metric-sub { color: var(--muted); font-size: 13px; margin-top: 6px; }
+
+  /* growth badge */
+  .growth-row {
+    display: flex; align-items: center; gap: 12px;
+    background: rgba(255,255,255,.03);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 18px;
+    margin-bottom: 14px;
+  }
+  .growth-badge {
+    padding: 6px 14px; border-radius: 999px;
+    font-size: 12px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: .8px;
+    white-space: nowrap;
+  }
+  .badge-high { background: rgba(52,211,153,.15); color: #34d399; border: 1px solid rgba(52,211,153,.3); }
+  .badge-low  { background: rgba(248,113,113,.15); color: #f87171; border: 1px solid rgba(248,113,113,.3); }
+
+  .prob-bar-wrap { flex:1; }
+  .prob-bar-label { font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+  .prob-bar-track {
+    background: rgba(255,255,255,.06);
+    border-radius: 999px; height: 8px; overflow: hidden;
+  }
+  .prob-bar-fill {
+    height: 100%; border-radius: 999px;
+    background: linear-gradient(90deg, var(--purple), var(--pink));
+    transition: width 1s cubic-bezier(.16,1,.3,1);
+  }
+
+  /* detail pills */
+  .detail-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 10px; margin-top: 16px;
+  }
+  .detail-pill {
+    background: rgba(255,255,255,.03);
+    border: 1px solid var(--border);
+    border-radius: 10px; padding: 12px 14px;
+  }
+  .detail-pill-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .8px; }
+  .detail-pill-value { font-size: 15px; font-weight: 500; margin-top: 4px; }
+
+  /* error */
+  .error-box {
+    background: rgba(248,113,113,.08);
+    border: 1px solid rgba(248,113,113,.3);
+    border-radius: 12px; padding: 16px 18px;
+    color: #f87171; font-size: 14px;
+  }
+
+  /* animate in */
+  @keyframes fadeUp {
+    from { opacity:0; transform:translateY(16px); }
+    to   { opacity:1; transform:translateY(0); }
+  }
+  .fade-up { animation: fadeUp .5s ease both; }
+</style>
+</head>
+<body>
+
+<div class="blob blob-1"></div>
+<div class="blob blob-2"></div>
+
+<header>
+  <div class="logo">₱</div>
+  <h1>PhonePe Predictor</h1>
+  <span>ML-Powered Transaction Intelligence</span>
+</header>
+
+<div class="hero">
+  <div class="hero-badge">⚡ Powered by Random Forest + Gradient Boosting</div>
+  <h2>Predict Transaction<br/>Amount & Growth</h2>
+  <p>Upload your trained models and get instant predictions for any state, quarter, and payment category.</p>
+</div>
+
+<div class="main">
+
+  <!-- LEFT: Model Upload -->
+  <div class="card">
+    <div class="card-title">Upload Models</div>
+    <div class="form-grid">
+      <div class="form-group full">
+        <label>Regression Model (.pkl) — RF Regressor</label>
+        <input type="file" id="rf-file" accept=".pkl" onchange="handleModelUpload('rf', this)"/>
+        <small id="rf-status" style="color:var(--muted);font-size:12px;margin-top:4px;">No file selected</small>
+      </div>
+      <div class="form-group full">
+        <label>Classification Model (.pkl) — GBC Classifier</label>
+        <input type="file" id="gbc-file" accept=".pkl" onchange="handleModelUpload('gbc', this)"/>
+        <small id="gbc-status" style="color:var(--muted);font-size:12px;margin-top:4px;">No file selected</small>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESULTS column spans 2 rows -->
+  <div class="card results" id="results-card">
+    <div class="card-title">Prediction Results</div>
+    <div class="result-empty" id="result-empty">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/>
+      </svg>
+      <p>Fill in the form and click<br/><strong>Run Prediction</strong></p>
+    </div>
+    <div id="result-content" style="display:none;"></div>
+  </div>
+
+  <!-- LEFT: Prediction Form -->
+  <div class="card">
+    <div class="card-title">Prediction Inputs</div>
+    <div class="form-grid">
+
+      <div class="form-group full">
+        <label>State</label>
+        <select id="state">
+          {% for s in states %}
+          <option value="{{ s }}">{{ s.replace("-"," ").title() }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Year</label>
+        <select id="year">
+          <option>2019</option><option>2020</option><option>2021</option>
+          <option selected>2022</option><option>2023</option><option>2024</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Quarter</label>
+        <select id="quarter">
+          <option value="1">Q1 (Jan–Mar)</option>
+          <option value="2">Q2 (Apr–Jun)</option>
+          <option value="3" selected>Q3 (Jul–Sep)</option>
+          <option value="4">Q4 (Oct–Dec)</option>
+        </select>
+      </div>
+
+      <div class="form-group full">
+        <label>Payment Category</label>
+        <select id="category">
+          {% for c in categories %}
+          <option value="{{ c }}">{{ c }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Transaction Count</label>
+        <input type="number" id="txn-count" placeholder="e.g. 50000" value="50000" min="1"/>
+      </div>
+
+      <div class="form-group">
+        <label>Registered Users</label>
+        <input type="number" id="reg-users" placeholder="e.g. 200000" value="200000" min="1"/>
+      </div>
+
+    </div>
+
+    <button class="btn" id="predict-btn" onclick="runPrediction()">
+      Run Prediction
+    </button>
+  </div>
+
+</div>
+
+<script>
+// ── Model file storage ───────────────────────────────────────
+const modelFiles = { rf: null, gbc: null };
+
+function handleModelUpload(type, input) {
+  const file = input.files[0];
+  if (!file) return;
+  modelFiles[type] = file;
+  const el = document.getElementById(type + "-status");
+  el.textContent = "✅ " + file.name + " (" + (file.size / 1024).toFixed(1) + " KB)";
+  el.style.color = "#34d399";
+}
+
+// ── Main prediction call ─────────────────────────────────────
+async function runPrediction() {
+  const btn = document.getElementById("predict-btn");
+
+  // Gather inputs
+  const state    = document.getElementById("state").value;
+  const year     = document.getElementById("year").value;
+  const quarter  = document.getElementById("quarter").value;
+  const category = document.getElementById("category").value;
+  const txnCount = document.getElementById("txn-count").value;
+  const regUsers = document.getElementById("reg-users").value;
+
+  if (!txnCount || !regUsers) {
+    showError("Please fill in Transaction Count and Registered Users.");
+    return;
+  }
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="btn-spinner"></span> Predicting...';
+
+  try {
+    const formData = new FormData();
+    formData.append("state",     state);
+    formData.append("year",      year);
+    formData.append("quarter",   quarter);
+    formData.append("category",  category);
+    formData.append("txn_count", txnCount);
+    formData.append("reg_users", regUsers);
+    if (modelFiles.rf)  formData.append("rf_model",  modelFiles.rf);
+    if (modelFiles.gbc) formData.append("gbc_model", modelFiles.gbc);
+
+    const res  = await fetch("/predict", { method: "POST", body: formData });
+    const data = await res.json();
+
+    if (data.success) {
+      showResult(data);
+    } else {
+      showError(data.error || "Prediction failed.");
+    }
+  } catch (e) {
+    showError("Server error: " + e.message);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = "Run Prediction";
+  }
+}
+
+// ── Render result ────────────────────────────────────────────
+function showResult(d) {
+  document.getElementById("result-empty").style.display   = "none";
+  const content = document.getElementById("result-content");
+  content.style.display = "block";
+
+  const isHigh     = d.high_growth === 1;
+  const badgeClass = isHigh ? "badge-high" : "badge-low";
+  const badgeText  = isHigh ? "High Growth" : "Low Growth";
+  const amountFmt  = new Intl.NumberFormat("en-IN", {
+    style: "currency", currency: "INR", maximumFractionDigits: 0
+  }).format(d.amount);
+
+  content.innerHTML = `
+    <div class="metric-block fade-up">
+      <div class="metric-label">Predicted Transaction Amount</div>
+      <div class="metric-value">₹${d.amount_cr} Cr</div>
+      <div class="metric-sub">${amountFmt}</div>
+    </div>
+
+    <div class="growth-row fade-up" style="animation-delay:.1s">
+      <span class="growth-badge ${badgeClass}">${badgeText}</span>
+      <div class="prob-bar-wrap">
+        <div class="prob-bar-label">High-Growth Probability: <strong>${d.growth_prob}%</strong></div>
+        <div class="prob-bar-track">
+          <div class="prob-bar-fill" id="prob-fill" style="width:0%"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="detail-grid fade-up" style="animation-delay:.2s">
+      <div class="detail-pill">
+        <div class="detail-pill-label">State</div>
+        <div class="detail-pill-value">${d.state.replace(/-/g," ").replace(/\w/g,c=>c.toUpperCase())}</div>
+      </div>
+      <div class="detail-pill">
+        <div class="detail-pill-label">Category</div>
+        <div class="detail-pill-value">${d.category}</div>
+      </div>
+      <div class="detail-pill">
+        <div class="detail-pill-label">Period</div>
+        <div class="detail-pill-value">${d.year} — Q${d.quarter}</div>
+      </div>
+      <div class="detail-pill">
+        <div class="detail-pill-label">Model</div>
+        <div class="detail-pill-value">RF + GBC</div>
+      </div>
+    </div>
+  `;
+
+  // Animate probability bar
+  setTimeout(() => {
+    const fill = document.getElementById("prob-fill");
+    if (fill) fill.style.width = d.growth_prob + "%";
+  }, 300);
+}
+
+function showError(msg) {
+  document.getElementById("result-empty").style.display   = "none";
+  const content = document.getElementById("result-content");
+  content.style.display = "block";
+  content.innerHTML = `<div class="error-box fade-up">⚠️ ${msg}</div>`;
+}
+</script>
+</body>
+</html>
