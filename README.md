@@ -1,13 +1,6 @@
 # 💸 PhonePe Pulse Data Analysis & Prediction
 
-<div align="center">
-  <img src="https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python" />
-  <img src="https://img.shields.io/badge/Flask-000000?style=for-the-badge&logo=flask&logoColor=white" alt="Flask" />
-  <img src="https://img.shields.io/badge/MySQL-4479A1?style=for-the-badge&logo=mysql&logoColor=white" alt="MySQL" />
-  <img src="https://img.shields.io/badge/scikit_learn-F7931E?style=for-the-badge&logo=scikit-learn&logoColor=white" alt="Scikit-Learn" />
-  <img src="https://img.shields.io/badge/Pandas-150458?style=for-the-badge&logo=pandas&logoColor=white" alt="Pandas" />
-  <img src="https://img.shields.io/badge/Jupyter-F37626.svg?&style=for-the-badge&logo=Jupyter&logoColor=white" alt="Jupyter" />
-</div>
+
 
 ## 📌 Overview
 This project is a comprehensive end-to-end data engineering and machine learning solution built around the **PhonePe Pulse** dataset. It extracts vast amounts of digital payment data, performs extensive Exploratory Data Analysis (EDA), stores the processed data in a MySQL database, and utilizes Machine Learning models to predict transaction amounts and growth probabilities. Finally, it serves these predictions through an interactive Flask web application.
