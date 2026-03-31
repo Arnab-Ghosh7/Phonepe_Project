@@ -13,13 +13,7 @@
 This project is a comprehensive end-to-end data engineering and machine learning solution built around the **PhonePe Pulse** dataset. It extracts vast amounts of digital payment data, performs extensive Exploratory Data Analysis (EDA), stores the processed data in a MySQL database, and utilizes Machine Learning models to predict transaction amounts and growth probabilities. Finally, it serves these predictions through an interactive Flask web application.
 
 ## 🚀 Features
-- **Data Extraction**: Automated Python scripts (`phonepe_extractor.py`, `code.py`) to parse nested JSON files from the PhonePe Pulse GitHub repository and convert them into structured Pandas DataFrames/CSVs.
-- **Database Integration**: Seamlessly loads processed CSV data into a **MySQL** database (`phonepe_db`) using `SQLAlchemy` for robust data warehousing (`database.py`).
-- **Exploratory Data Analysis (EDA)**: In-depth analysis of transaction trends, user behavior, and insurance metrics across various states and districts in India (`PhonePe_EDA_Completed.ipynb`).
-- **Machine Learning**: 
-  - **Random Forest Regressor** to predict future transaction amounts.
-  - **Gradient Boosting Classifier** to determine the probability of high transaction growth (`PhonePe_ML_Completed.ipynb`).
-- **Web Application**: A **Flask**-based interactive UI (`app.py` & `templates/index.html`) that allows users to input parameters (State, Year, Quarter, Category) and get real-time predictions.
+
 
 ## 🛠️ Technologies & Tools Used
 - **Programming Language**: `Python` 🐍
