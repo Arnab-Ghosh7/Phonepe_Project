@@ -8,7 +8,8 @@
   <img src="https://img.shields.io/badge/Pandas-150458?style=for-the-badge&logo=pandas&logoColor=white" alt="Pandas" />
   <img src="https://img.shields.io/badge/Jupyter-F37626.svg?&style=for-the-badge&logo=Jupyter&logoColor=white" alt="Jupyter" />
 </div>
-## 📌 Overview
+
+##  📌 Overview
 This project is a comprehensive end-to-end data engineering and machine learning solution built around the **PhonePe Pulse** dataset. It extracts vast amounts of digital payment data, performs extensive Exploratory Data Analysis (EDA), stores the processed data in a MySQL database, and utilizes Machine Learning models to predict transaction amounts and growth probabilities. Finally, it serves these predictions through an interactive Flask web application.
 
 
